@@ -10,6 +10,7 @@ config.inputFormat = '.png';
 config.outputFormat = '.tif';
 config.maxStars = 10;
 config.discardPercentile = 0.0;
+config.medianOver = 40;
 config.topMatchesMasterAlign = 4;
 config.topMatchesMonoAlign = 4;
 
@@ -66,8 +67,7 @@ if(config.analyzeFrames == 1)
     save([config.basepath,'parameters\refVectorY',config.filter, '.mat'], 'refVectorY');
 end
 
-if(config.findStackParameters == 1)  
-    
+if(config.findStackParameters == 1)      
     xvec = importdata([config.basepath,'parameters\xvec',config.filter,'.mat']);
     yvec = importdata([config.basepath,'parameters\yvec',config.filter,'.mat']);
     background = importdata([config.basepath,'parameters\background',config.filter,'.mat']);
@@ -115,12 +115,11 @@ if(config.findStackParameters == 1)
     hold on;
     plot(refVectorXAlign, refVectorYAlign, 'ro', 'MarkerSize',10); 
     for i=1:length(selectedFrames)
-        point = [xvec{selectedFrames(i)}; yvec{selectedFrames(i)}];
         R = [cos(th(i)) -sin(th(i)); sin(th(i)) cos(th(i))];
         t = [dx(i);dy(i)];
-        debugMatrix = (R*point) + repmat(t, 1, length(point));      
+        debugMatrix = (R*[xvec{selectedFrames(i)}; yvec{selectedFrames(i)}]) + repmat(t, 1, length([xvec{selectedFrames(i)}; yvec{selectedFrames(i)}]));      
         plot(debugMatrix(1,:), debugMatrix(2,:), 'go');
-        %plot(xvec{selectedFrames(i)},yvec{selectedFrames(i)}, 'go');
+        %plot(xvec{selectedFrames(i)},yvec{selectedFrames(i)}, 'go'); %Debug tracking errors
     end
     figure(2)
     plot(qual)
@@ -177,7 +176,7 @@ if(config.stackImages == 1)
         lightFrame = imwarp(lightFrame,trans,'OutputView',outputView); 
         temparray(:,:,tempcount) = lightFrame(1:length(ROI_y),1:length(ROI_x));
         tempcount = tempcount + 1;
-        if(mod(i,40)==0)
+        if(mod(i,config.medianOver)==0)
             imarray(:,:,count) = median(temparray,3);
             clear temparray;
             count = count+1;
