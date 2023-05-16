@@ -7,7 +7,6 @@ config.filter = 'R';
 config.align = 'R';
 
 config.inputFormat = '.png';
-config.outputFormat = '.tif';
 config.maxStars = 10;
 config.discardPercentile = 0.0;
 config.medianOver = 40;
@@ -194,24 +193,10 @@ if(config.stackImages == 1)
         end
     end
     
-    save([config.basepath, 'out\rawStackFrame', '_', num2str(length(selectedFrames)), '_', config.filter, '.mat'],'stackFrame');
-    outputFrame = im2uint16((stackFrame*5));
-    figure(4);
-    imshow(outputFrame, 'Border', 'tight')
-    imwrite(outputFrame, [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, config.outputFormat]);
-    outputFrame2 = uint32(stackFrame*65536*65536);
-    t = Tiff([config.basepath, 'out\','testfile','_', config.filter, config.outputFormat],'w');
-    tagstruct.ImageLength     = size(outputFrame2,1);
-    tagstruct.ImageWidth      = size(outputFrame2,2);
-    tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
-    tagstruct.BitsPerSample   = 32;
-    tagstruct.SamplesPerPixel = 1;
-    tagstruct.RowsPerStrip    = 16;
-    tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
-    tagstruct.Software        = 'MATLAB';
-    t.setTag(tagstruct)
-    t.write(outputFrame2);
-    t.close();
+    imshow(stackFrame*5, 'Border', 'tight')    
+    outputFrame = uint32(stackFrame*2^32);
+    outputPath = [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'];
+    save32BitImage(outputFrame, outputPath); 
 end
 
 function fileNameArray = getFileNames(config)
@@ -319,4 +304,19 @@ function [theta, t, d] = alignFrames(refVectorX, refVectorY, refTriangles, topMa
             t = 0;
             d = 1;
         end
+end
+
+function Save32BitImage(outputFrame, path)
+    t = Tiff(path,'w');
+    tagstruct.ImageLength     = size(outputFrame,1);
+    tagstruct.ImageWidth      = size(outputFrame,2);
+    tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
+    tagstruct.BitsPerSample   = 32;
+    tagstruct.SamplesPerPixel = 1;
+    tagstruct.RowsPerStrip    = 16;
+    tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
+    tagstruct.Software        = 'MATLAB';
+    t.setTag(tagstruct)
+    t.write(outputFrame);
+    t.close();
 end

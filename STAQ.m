@@ -195,18 +195,8 @@ if(config.stackImages == 1)
     
     imshow(stackFrame*5, 'Border', 'tight')    
     outputFrame = uint32(stackFrame*2^32);
-    t = Tiff([config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'],'w');
-    tagstruct.ImageLength     = size(outputFrame,1);
-    tagstruct.ImageWidth      = size(outputFrame,2);
-    tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
-    tagstruct.BitsPerSample   = 32;
-    tagstruct.SamplesPerPixel = 1;
-    tagstruct.RowsPerStrip    = 16;
-    tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
-    tagstruct.Software        = 'MATLAB';
-    t.setTag(tagstruct)
-    t.write(outputFrame);
-    t.close();
+    outputPath = [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'];
+    save32BitImage(outputFrame, outputPath); 
 end
 
 function fileNameArray = getFileNames(config)
@@ -314,4 +304,19 @@ function [theta, t, d] = alignFrames(refVectorX, refVectorY, refTriangles, topMa
             t = 0;
             d = 1;
         end
+end
+
+function save32BitImage(outputFrame, outputPath)
+    t = Tiff(outputPath,'w');
+    tagstruct.ImageLength     = size(outputFrame,1);
+    tagstruct.ImageWidth      = size(outputFrame,2);
+    tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
+    tagstruct.BitsPerSample   = 32;
+    tagstruct.SamplesPerPixel = 1;
+    tagstruct.RowsPerStrip    = 16;
+    tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
+    tagstruct.Software        = 'MATLAB';
+    t.setTag(tagstruct)
+    t.write(outputFrame);
+    t.close();
 end
