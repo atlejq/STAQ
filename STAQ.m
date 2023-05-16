@@ -173,7 +173,7 @@ if(config.stackImages == 1)
         lightFrame = lightFrame - darkFrame;
         
         trans = affine2d([cos(th(i)) sin(th(i)) 0; -sin(th(i)) cos(th(i)) 0; dx(i) , dy(i), 1]);
-        outputView = imref2d([ceil(length(ROI_y)*1.2), ceil(length(ROI_x)*1.2)]);
+        outputView = imref2d([ceil(length(ROI_y)), ceil(length(ROI_x))]);
         lightFrame = imwarp(lightFrame,trans,'OutputView',outputView); 
         temparray(:,:,tempcount) = lightFrame(1:length(ROI_y),1:length(ROI_x));
         tempcount = tempcount + 1;
