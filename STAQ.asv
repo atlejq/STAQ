@@ -199,10 +199,10 @@ if(config.stackImages == 1)
     figure(4);
     imshow(outputFrame, 'Border', 'tight')
     imwrite(outputFrame, [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, config.outputFormat]);
-    
+    outputFrame2 = uint32(stackFrame*65536*65536);
     t = Tiff([config.basepath, 'out\','testfile','_', config.filter, config.outputFormat],'w');
-    tagstruct.ImageLength     = size(uint32(stackFrame,1);
-    tagstruct.ImageWidth      = size(stackFrame,2);
+    tagstruct.ImageLength     = size(outputFrame2,1);
+    tagstruct.ImageWidth      = size(outputFrame2,2);
     tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
     tagstruct.BitsPerSample   = 32;
     tagstruct.SamplesPerPixel = 1;
@@ -210,7 +210,7 @@ if(config.stackImages == 1)
     tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
     tagstruct.Software        = 'MATLAB';
     t.setTag(tagstruct)
-    t.write(stackFrame);
+    t.write(outputFrame2);
     t.close();
 end
 

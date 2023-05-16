@@ -7,7 +7,6 @@ config.filter = 'R';
 config.align = 'R';
 
 config.inputFormat = '.png';
-config.outputFormat = '.tif';
 config.maxStars = 10;
 config.discardPercentile = 0.0;
 config.medianOver = 40;
@@ -194,11 +193,20 @@ if(config.stackImages == 1)
         end
     end
     
-    save([config.basepath, 'out\rawStackFrame', '_', num2str(length(selectedFrames)), '_', config.filter, '.mat'],'stackFrame');
-    outputFrame = im2uint16((stackFrame*5));
-    figure(4);
-    imshow(outputFrame, 'Border', 'tight')
-    imwrite(outputFrame, [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, config.outputFormat]);
+    imshow(stackFrame*5, 'Border', 'tight')    
+    outputFrame = uint32(stackFrame*2^32);
+    t = Tiff([config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'],'w');
+    tagstruct.ImageLength     = size(outputFrame,1);
+    tagstruct.ImageWidth      = size(outputFrame,2);
+    tagstruct.Photometric     = Tiff.Photometric.MinIsBlack;
+    tagstruct.BitsPerSample   = 32;
+    tagstruct.SamplesPerPixel = 1;
+    tagstruct.RowsPerStrip    = 16;
+    tagstruct.PlanarConfiguration = Tiff.PlanarConfiguration.Chunky;
+    tagstruct.Software        = 'MATLAB';
+    t.setTag(tagstruct)
+    t.write(outputFrame);
+    t.close();
 end
 
 function fileNameArray = getFileNames(config)
