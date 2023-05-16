@@ -1,9 +1,9 @@
 clear
 
-config.basepath = 'C:\F\astro\matlab\m1\';
-config.darkPathRGB = 'parameters\darkframe10.tif';
+config.basepath = 'C:\F\astro\matlab\m1test\';
+config.darkPathRGB = 'parameters\darkframe.tif';
 config.darkPathH = 'parameters\darkframe20.tif';
-config.filter = 'H';
+config.filter = 'R';
 config.align = 'R';
 
 config.inputFormat = '.png';
@@ -64,7 +64,10 @@ if(config.analyzeFrames == 1)
     save([config.basepath,'parameters\maxQualFramePath',config.filter, '.mat'], 'maxQualFramePath');
     save([config.basepath,'parameters\refVectorX',config.filter, '.mat'], 'refVectorX');
     save([config.basepath,'parameters\refVectorY',config.filter, '.mat'], 'refVectorY');
-else
+end
+
+if(config.findStackParameters == 1)  
+    
     xvec = importdata([config.basepath,'parameters\xvec',config.filter,'.mat']);
     yvec = importdata([config.basepath,'parameters\yvec',config.filter,'.mat']);
     background = importdata([config.basepath,'parameters\background',config.filter,'.mat']);
@@ -73,10 +76,8 @@ else
     refVectorX = importdata([config.basepath,'parameters\refVectorX',config.filter,'.mat']);
     refVectorY = importdata([config.basepath,'parameters\refVectorY',config.filter,'.mat']);
     refVectorXAlign = importdata([config.basepath,'parameters\refVectorX',config.align,'.mat']);
-    refVectorYAlign = importdata([config.basepath,'parameters\refVectorY',config.align,'.mat']);
-end
-
-if(config.findStackParameters == 1)      
+    refVectorYAlign = importdata([config.basepath,'parameters\refVectorY',config.align,'.mat']);  
+    
     qt = prctile(qual,config.discardPercentile*100);
     selectedFrames = find(qt<=qual);
     
@@ -125,25 +126,27 @@ if(config.findStackParameters == 1)
     plot(qual)
     hold on;
     plot(background/max(background))
+    legend('Quality', 'Background')
     
     figure(3)
     plot(qual(selectedFrames))
     hold on;
     plot(background(selectedFrames)/max(background(selectedFrames)))
+    legend('Quality', 'Background')
     
     save([config.basepath,'parameters\dx.mat'],'dx');
     save([config.basepath,'parameters\dy.mat'],'dy');
     save([config.basepath,'parameters\th.mat'],'th');
     save([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
-else
+end
+
+if(config.stackImages == 1)   
     load([config.basepath,'parameters\dx.mat']);
     load([config.basepath,'parameters\dy.mat']);    
     load([config.basepath,'parameters\th.mat']);
     load([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
     load([config.basepath,'parameters\background',config.filter,'.mat'],'background');
-end
-
-if(config.stackImages == 1)
+    
     if(config.filter == "H")
         darkPath = config.darkPathH;
     else
