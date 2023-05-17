@@ -13,9 +13,9 @@ config.medianOver = 40;
 config.topMatchesMasterAlign = 4;
 config.topMatchesMonoAlign = 4;
 
-config.analyzeFrames = 0;  
+config.analyzeFrames = 1;  
 config.findStackParameters = 0;
-config.stackImages = 1;
+config.stackImages = 0;
 
 ROI_y = 1:2822;
 ROI_x = 1:4144;
@@ -132,16 +132,16 @@ if(config.findStackParameters == 1)
     plot(background(selectedFrames)/max(background(selectedFrames)))
     legend('Quality', 'Background')
     
-    save([config.basepath,'parameters\dx.mat'],'dx');
-    save([config.basepath,'parameters\dy.mat'],'dy');
-    save([config.basepath,'parameters\th.mat'],'th');
+    save([config.basepath,'parameters\dx',config.filter,'.mat'],'dx');
+    save([config.basepath,'parameters\dy',config.filter,'.mat'],'dy');
+    save([config.basepath,'parameters\th',config.filter,'.mat'],'th');
     save([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
 end
 
 if(config.stackImages == 1)   
-    load([config.basepath,'parameters\dx.mat']);
-    load([config.basepath,'parameters\dy.mat']);    
-    load([config.basepath,'parameters\th.mat']);
+    load([config.basepath,'parameters\dx',config.filter,'.mat']);
+    load([config.basepath,'parameters\dy',config.filter,'.mat']);    
+    load([config.basepath,'parameters\th',config.filter,'.mat']);
     load([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
     load([config.basepath,'parameters\background',config.filter,'.mat'],'background');
     
