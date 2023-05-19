@@ -10,8 +10,8 @@ config.inputFormat = '.png';
 config.maxStars = 10;
 config.discardPercentile = 0.0;
 config.medianOver = 40;
-config.topMatchesMasterAlign = 4;
-config.topMatchesMonoAlign = 4;
+config.topMatchesMasterAlign = 5;
+config.topMatchesMonoAlign = 5;
 
 config.analyzeFrames = 0;  
 config.findStackParameters = 1;
@@ -36,15 +36,15 @@ if(config.analyzeFrames == 1)
         stars(n) = length(starMatrix);
         background(n) = sum(sum(lightFrame));
         
-        corrMatrix = flipud(sortrows(starMatrix',5));
+        corrMatrix = flipud(sortrows(starMatrix',3));
         corrMatrix = corrMatrix';
         
         if(length(corrMatrix)>config.maxStars )
-            corrMatrix = corrMatrix(1:4,1:config.maxStars);
+            corrMatrix = corrMatrix(1:2,1:config.maxStars);
         end
               
-        xvec(n,:) = {corrMatrix(1,:)+corrMatrix(3,:)/2};
-        yvec(n,:) = {corrMatrix(2,:)+corrMatrix(4,:)/2};
+        xvec(n,:) = {corrMatrix(1,:)};
+        yvec(n,:) = {corrMatrix(2,:)};
         
         if(mod(n,10)==0)
             n
@@ -227,7 +227,7 @@ function starMatrix = analyzeStarField(lightFrame, config)
     [label_image] = bwlabel(BW,8);
     stats=regionprops(label_image,'BoundingBox'); 
     boundingBox = [stats.BoundingBox];
-    starMatrix = [boundingBox(1:4:end);boundingBox(2:4:end);boundingBox(3:4:end);boundingBox(4:4:end);(boundingBox(3:4:end).^2+boundingBox(4:4:end).^2).^0.5];
+    starMatrix = [boundingBox(1:4:end)+boundingBox(3:4:end)/2; boundingBox(2:4:end)+boundingBox(4:4:end)/2;(boundingBox(3:4:end).^2+boundingBox(4:4:end).^2).^0.5];
 end
 
 function triangleParameters = triangles(x, y)
