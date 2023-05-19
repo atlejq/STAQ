@@ -13,8 +13,8 @@ config.medianOver = 40;
 config.topMatchesMasterAlign = 4;
 config.topMatchesMonoAlign = 4;
 
-config.analyzeFrames = 1;  
-config.findStackParameters = 0;
+config.analyzeFrames = 0;  
+config.findStackParameters = 1;
 config.stackImages = 0;
 
 ROI_y = 1:2822;
@@ -83,9 +83,9 @@ if(config.findStackParameters == 1)
     dx = zeros(1, length(selectedFrames));
     dy = zeros(1, length(selectedFrames));
     th = zeros(1, length(selectedFrames));
-    discardFrames = uint8(zeros(1, length(selectedFrames)));  
+    discardFrames = uint32(zeros(1, length(selectedFrames)));  
     
-    refTriangles = triangles(refVectorX,refVectorY);
+    refTriangles = triangles(refVectorX,refVectorY);    
     refTrianglesAlign = triangles(refVectorXAlign,refVectorYAlign);
 
     refTriangles = sortrows(refTriangles,4);
@@ -267,13 +267,13 @@ end
 
 function [theta, t, d] = alignFrames(refVectorX, refVectorY, refTriangles, topMatches, xvec, yvec, e)
         frameTriangles = triangles(xvec,yvec);
-        vote = zeros(length(refVectorX),length(yvec), 'uint8');
-        cVote = zeros(length(refVectorX),length(yvec), 'uint8'); 
+        vote = zeros(length(refVectorX),length(yvec), 'uint32');
+        cVote = zeros(length(refVectorX),length(yvec), 'uint32'); 
           
         for a = 1:height(refTriangles)
-            triangleList = find(((refTriangles(a,4)-e)<frameTriangles(:,4))&(frameTriangles(:,4)<(refTriangles(a,4)+e)));
+            triangleList = find(((refTriangles(a,4)-e)<frameTriangles(:,4))&(frameTriangles(:,4)<(refTriangles(a,4)+e)));           
             for c = 1:length(triangleList)
-               b=triangleList(c);
+               b=triangleList(c);               
                 if (sqrt(((refTriangles(a,4) - frameTriangles(b,4))^2 + (refTriangles(a,5) - frameTriangles(b,5)))^2) < e)
                     vote((refTriangles(a,1)),(frameTriangles(b,1))) = vote(refTriangles(a,1),frameTriangles(b,1)) + 1;
                     vote((refTriangles(a,2)),(frameTriangles(b,2))) = vote(refTriangles(a,2),frameTriangles(b,2)) + 1;
@@ -281,7 +281,6 @@ function [theta, t, d] = alignFrames(refVectorX, refVectorY, refTriangles, topMa
                 end
             end   
         end
-     
         for row = 1:height(vote)
             [maxRowVote, ind] = max(vote(row,:));
             cVote(row,ind) = maxRowVote-max(max(vote(row,[1:ind-1 ind+1:width(vote)])),max(vote([1:row-1 row+1:height(vote)],ind)));
@@ -290,6 +289,7 @@ function [theta, t, d] = alignFrames(refVectorX, refVectorY, refTriangles, topMa
         cVote = max(cVote,0);
     
         [maxVote, maxVoteIndex] = max(cVote);
+        
         votePairs = [1:1:length(maxVoteIndex); maxVoteIndex; maxVote];
         rankPairs = flipud(sortrows(votePairs',3));
         
