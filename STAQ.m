@@ -1,7 +1,7 @@
 clear
 
 config.basepath = 'C:\F\astro\matlab\m1test\';
-config.darkPathRGB = 'parameters\darkframe.tif';
+config.darkPathRGB = 'parameters\darkframe10.tif';
 config.darkPathH = 'parameters\darkframe20.tif';
 config.filter = 'R';
 config.align = 'R';
