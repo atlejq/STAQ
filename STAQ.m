@@ -9,13 +9,13 @@ config.align = 'R';
 config.inputFormat = '.png';
 config.maxStars = 10;
 config.discardPercentile = 0.0;
-config.medianOver = 40;
+config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
 
 config.analyzeFrames = 0;  
-config.findStackParameters = 1;
-config.stackImages = 0;
+config.findStackParameters = 0;
+config.stackImages = 1;
 
 ROI_y = 1:2822;
 ROI_x = 1:4144;
@@ -184,14 +184,7 @@ if(config.stackImages == 1)
         end
     end
 
-    stackFrame = zeros(length(imarray(:,1,:)),length(imarray(1,:,:)));
-    L = length(imarray(1,:,:));
-    for i=1:length(imarray(:,1,:))
-        for j=1:L
-            testPixel = sort(imarray(i,j,:));
-            stackFrame(i,j) = median(testPixel);
-        end
-    end
+    stackFrame = median(imarray,3);
     
     imshow(stackFrame*5, 'Border', 'tight')    
     outputFrame = uint32(stackFrame*2^32);
