@@ -13,8 +13,8 @@ config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
 
-config.analyzeFrames = 0;  
-config.findStackParameters = 0;
+config.analyzeFrames = 1;  
+config.findStackParameters = 1;
 config.stackImages = 1;
 
 ROI_y = 1:2822;
@@ -186,10 +186,12 @@ if(config.stackImages == 1)
 
     stackFrame = median(imarray,3);
     
+    figure(4)
     imshow(stackFrame*5, 'Border', 'tight')    
     outputFrame = uint32(stackFrame*2^32);
     outputPath = [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'];
     save32BitImage(outputFrame, outputPath); 
+
 end
 
 function fileNameArray = getFileNames(config)
