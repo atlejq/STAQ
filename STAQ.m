@@ -1,6 +1,6 @@
 clear
 
-config.basepath = 'C:\F\astro\matlab\m1test\';
+config.basepath = 'C:\F\astro\matlab\m1\';
 config.darkPathRGB = 'parameters\darkframe10.tif';
 config.darkPathH = 'parameters\darkframe20.tif';
 config.filter = 'R';
@@ -8,7 +8,7 @@ config.align = 'R';
 
 config.inputFormat = '.png';
 config.maxStars = 10;
-config.discardPercentile = 0.0;
+config.discardPercentile = 0.1;
 config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
@@ -159,7 +159,7 @@ if(config.stackImages == 1)
     darkFrame = darkFrame(ROI_y,ROI_x);
     darkFrame = im2double(darkFrame);
 
-    imarray = zeros(length(ROI_y),length(ROI_x), floor(length(selectedFrames)/config.medianOver));
+    stackFrame = zeros(length(ROI_y),length(ROI_x));
     temparray = zeros(length(ROI_y),length(ROI_x), config.medianOver);
     
     count = 1;
@@ -179,15 +179,12 @@ if(config.stackImages == 1)
         temparray(:,:,tempcount) = lightFrame(1:length(ROI_y),1:length(ROI_x));
         tempcount = tempcount + 1;
         if(mod(i,config.medianOver)==0)
-            imarray(:,:,count) = median(temparray,3);
+            stackFrame = stackFrame + median(temparray,3)/(floor(length(selectedFrames)/config.medianOver));
             clear temparray;
-            count = count+1;
             tempcount = 1;
             i
         end
     end
-
-    stackFrame = median(imarray,3);
     
     figure(4)
     imshow(stackFrame*5, 'Border', 'tight')    
