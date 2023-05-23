@@ -1,6 +1,6 @@
 clear
 
-config.basepath = 'C:\F\astro\matlab\m1test\';
+config.basepath = 'C:\F\astro\matlab\m1\';
 config.darkPathRGB = 'parameters\darkframe10.tif';
 config.darkPathH = 'parameters\darkframe20.tif';
 config.filter = 'R';
@@ -8,7 +8,7 @@ config.align = 'R';
 
 config.inputFormat = '.png';
 config.maxStars = 10;
-config.discardPercentile = 0.0;
+config.discardPercentile = 0.1;
 config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
