@@ -13,8 +13,8 @@ config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
 
-config.analyzeFrames = 1;  
-config.findStackParameters = 1;
+config.analyzeFrames = 0;  
+config.findStackParameters = 0;
 config.stackImages = 1;
 
 ROI_y = 1:2822;
@@ -26,7 +26,8 @@ xvec={};
 yvec={};
 qual=[];
 
-if(config.analyzeFrames == 1)      
+if(config.analyzeFrames == 1)  
+    tic
     fileNameArray = getFileNames(config);
     
     for n = 1:height(fileNameArray)   
@@ -64,6 +65,7 @@ if(config.analyzeFrames == 1)
     save([config.basepath,'parameters\maxQualFramePath',config.filter, '.mat'], 'maxQualFramePath');
     save([config.basepath,'parameters\refVectorX',config.filter, '.mat'], 'refVectorX');
     save([config.basepath,'parameters\refVectorY',config.filter, '.mat'], 'refVectorY');
+    toc
 end
 
 if(config.findStackParameters == 1)      
@@ -138,7 +140,8 @@ if(config.findStackParameters == 1)
     save([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
 end
 
-if(config.stackImages == 1)   
+if(config.stackImages == 1)  
+    tic
     load([config.basepath,'parameters\dx',config.filter,'.mat']);
     load([config.basepath,'parameters\dy',config.filter,'.mat']);    
     load([config.basepath,'parameters\th',config.filter,'.mat']);
@@ -156,8 +159,8 @@ if(config.stackImages == 1)
     darkFrame = darkFrame(ROI_y,ROI_x);
     darkFrame = im2double(darkFrame);
 
-    imarray = zeros(length(ROI_y),length(ROI_x));
-    temparray = zeros(length(ROI_y),length(ROI_x));
+    imarray = zeros(length(ROI_y),length(ROI_x), floor(length(selectedFrames)/config.medianOver));
+    temparray = zeros(length(ROI_y),length(ROI_x), config.medianOver);
     
     count = 1;
     tempcount = 1;
@@ -191,7 +194,7 @@ if(config.stackImages == 1)
     outputFrame = uint32(stackFrame*2^32);
     outputPath = [config.basepath, 'out\', num2str(length(selectedFrames)), '_', config.filter, '.tif'];
     save32BitImage(outputFrame, outputPath); 
-
+    toc
 end
 
 function fileNameArray = getFileNames(config)
