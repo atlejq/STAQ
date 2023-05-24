@@ -8,7 +8,7 @@ config.align = 'R';
 
 config.inputFormat = '.png';
 config.maxStars = 10;
-config.discardPercentile = 0.1;
+config.discardPercentile = 0.0;
 config.medianOver = 10;
 config.topMatchesMasterAlign = 5;
 config.topMatchesMonoAlign = 5;
@@ -201,10 +201,10 @@ function fileNameArray = getFileNames(config)
         if(contains(folders(n).name, config.filter))
             lightPath = [config.basepath, 'lights', '\', folders(n).name, '\'];
             fileList = dir([lightPath, '*', config.inputFormat]);
-                for m = 1:length(fileList)
-                    path = [fileList(m).folder, '\', fileList(m).name];
-                    fileNameArray = [fileNameArray; path];
-                end
+            for m = 1:length(fileList)
+                path = [fileList(m).folder, '\', fileList(m).name];
+                fileNameArray = [fileNameArray; path];
+            end
         end
     end       
 end
