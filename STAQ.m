@@ -1,6 +1,6 @@
 clear
 
-config.basepath = 'C:\F\astro\matlab\m1test\';
+config.basepath = 'C:\F\astro\matlab\m1\';
 config.darkPathRGB = 'parameters\darkframe10.tif';
 config.darkPathH = 'parameters\darkframe20.tif';
 config.filter = 'R';
@@ -8,17 +8,16 @@ config.align = 'R';
 
 config.inputFormat = '.png';
 config.maxStars = 10;
-config.discardPercentile = 0.0;
+config.discardPercent = 10;
 config.medianOver = 10;
-config.topMatchesMasterAlign = 5;
-config.topMatchesMonoAlign = 5;
+config.topMatchesMasterAlign = 3;
+config.topMatchesMonoAlign = 3;
 
 config.analyzeFrames = 0;  
-config.findStackParameters = 0;
-config.stackImages = 1;
-
-ROI_y = 1:2822;
-ROI_x = 1:4144;
+config.findStackParameters = 1;
+config.stackImages = 0;
+config.ROI_y = 1:2822;
+config.ROI_x = 1:4144;
 
 e = 0.0005;
 
@@ -32,7 +31,7 @@ if(config.analyzeFrames == 1)
     
     for n = 1:height(fileNameArray)   
         lightFrame = imread(fileNameArray(n,:));
-        lightFrame = lightFrame(ROI_y,ROI_x);
+        lightFrame = lightFrame(config.ROI_y,config.ROI_x);
         starMatrix = analyzeStarField(lightFrame, config);
         stars(n) = length(starMatrix);
         background(n) = sum(sum(lightFrame));
@@ -41,9 +40,9 @@ if(config.analyzeFrames == 1)
         corrMatrix = corrMatrix';
         
         if(length(corrMatrix)>config.maxStars )
-            corrMatrix = corrMatrix(1:2,1:config.maxStars);
+            corrMatrix = corrMatrix(1:3,1:config.maxStars);
         end
-              
+        
         xvec(n,:) = {corrMatrix(1,:)};
         yvec(n,:) = {corrMatrix(2,:)};
         
@@ -68,7 +67,8 @@ if(config.analyzeFrames == 1)
     toc
 end
 
-if(config.findStackParameters == 1)      
+if(config.findStackParameters == 1)   
+    tic
     xvec = importdata([config.basepath,'parameters\xvec',config.filter,'.mat']);
     yvec = importdata([config.basepath,'parameters\yvec',config.filter,'.mat']);
     background = importdata([config.basepath,'parameters\background',config.filter,'.mat']);
@@ -79,7 +79,8 @@ if(config.findStackParameters == 1)
     refVectorXAlign = importdata([config.basepath,'parameters\refVectorX',config.align,'.mat']);
     refVectorYAlign = importdata([config.basepath,'parameters\refVectorY',config.align,'.mat']);  
     
-    qt = prctile(qual,config.discardPercentile*100);
+    qt = prctile(qual,config.discardPercent);
+    
     selectedFrames = find(qt<=qual);
     
     dx = zeros(1, length(selectedFrames));
@@ -103,14 +104,14 @@ if(config.findStackParameters == 1)
        th(i) = theta+mth;
        discardFrames(i) = d;
     end 
-   
+    
     dx(discardFrames==1) = [];
     dy(discardFrames==1) = [];
     th(discardFrames==1) = [];
     selectedFrames(discardFrames==1) = [];
     
     maxQualFrame = imread(maxQualFramePath); 
-    maxQualFrame = maxQualFrame(ROI_y,ROI_x);
+    maxQualFrame = maxQualFrame(config.ROI_y,config.ROI_x);
     figure(1)
     imshow(maxQualFrame, 'Border', 'tight')
     hold on;
@@ -138,6 +139,7 @@ if(config.findStackParameters == 1)
     save([config.basepath,'parameters\dy',config.filter,'.mat'],'dy');
     save([config.basepath,'parameters\th',config.filter,'.mat'],'th');
     save([config.basepath,'parameters\selectedFrames',config.filter,'.mat'],'selectedFrames');
+    toc
 end
 
 if(config.stackImages == 1)  
@@ -156,11 +158,11 @@ if(config.stackImages == 1)
         
     darkFrame = imread([config.basepath, darkPath]);
     darkFrame = rgb2gray(darkFrame);
-    darkFrame = darkFrame(ROI_y,ROI_x);
+    darkFrame = darkFrame(config.ROI_y,config.ROI_x);
     darkFrame = im2double(darkFrame);
 
-    stackFrame = zeros(length(ROI_y),length(ROI_x));
-    temparray = zeros(length(ROI_y),length(ROI_x), config.medianOver);
+    stackFrame = zeros(length(config.ROI_y),length(config.ROI_x));
+    temparray = zeros(length(config.ROI_y),length(config.ROI_x), config.medianOver);
     
     count = 1;
     tempcount = 1;
@@ -168,15 +170,15 @@ if(config.stackImages == 1)
 
     for i=1:length(selectedFrames)
         lightFrame = imread(fileNameArray(selectedFrames(i),:));
-        lightFrame = lightFrame(ROI_y,ROI_x);
+        lightFrame = lightFrame(config.ROI_y,config.ROI_x);
         lightFrame = im2double(lightFrame);      
         lightFrame = lightFrame*max(background(selectedFrames))/background(selectedFrames(i));
         lightFrame = lightFrame - darkFrame;
         
         trans = affine2d([cos(th(i)) sin(th(i)) 0; -sin(th(i)) cos(th(i)) 0; dx(i) , dy(i), 1]);
-        outputView = imref2d([ceil(length(ROI_y)), ceil(length(ROI_x))]);
+        outputView = imref2d([ceil(length(config.ROI_y)), ceil(length(config.ROI_x))]);
         lightFrame = imwarp(lightFrame,trans,'OutputView',outputView); 
-        temparray(:,:,tempcount) = lightFrame(1:length(ROI_y),1:length(ROI_x));
+        temparray(:,:,tempcount) = lightFrame(1:length(config.ROI_y),1:length(config.ROI_x));
         tempcount = tempcount + 1;
         if(mod(i,config.medianOver)==0)
             stackFrame = stackFrame + median(temparray,3)/(floor(length(selectedFrames)/config.medianOver));
